@@ -34,17 +34,31 @@ class LoginTest(TestCase):
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, 200)
 
+    def test_正常系_未ログイン(self):
+        self.client.logout()
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 200)
+
     def test_正常系_admin権限_管理画面(self):
         self.admin_login()
         response = self.client.get("/admin/")
         self.assertEqual(response.status_code, 200)
+        response = self.client.get("/admin/blog/post/")
+        self.assertEqual(response.status_code, 200)
 
-    def test_正常系_staff権限_管理画面(self):
+    def test_異常系_staff権限_管理画面(self):
         self.staff_login()
         response = self.client.get("/admin/")
         self.assertEqual(response.status_code, 200)
+        response = self.client.get("/admin/blog/post/")
+        self.assertEqual(response.status_code, 403)
 
     def test_異常系_user権限_管理画面(self):
         self.user_login()
+        response = self.client.get("/admin/")
+        self.assertEqual(response.status_code, 302)
+
+    def test_異常系_未ログイン_管理画面(self):
+        self.client.logout()
         response = self.client.get("/admin/")
         self.assertEqual(response.status_code, 302)
