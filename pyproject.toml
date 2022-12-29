@@ -1,0 +1,11 @@
+[tool.black]
+line-length = 130
+target-version = ['py39']
+include = '\.py$'
+exclude = '''
+(
+    migrations
+    | .tox
+    | venv
+)
+'''

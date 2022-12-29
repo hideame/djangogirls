@@ -2,3 +2,4 @@ Django~=3.2.10
 coverage==7.0.1
 PyYAML==6.0
 isort==5.11.4
+black==22.12.0
