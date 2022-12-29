@@ -1,8 +1,8 @@
-from blog.models import Post
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
+from blog.models import Post
 
 # NOTE: admin権限は利用想定していないのでテストしない
 # TODO: user権限でログイン可能になったらテストケース追加する
