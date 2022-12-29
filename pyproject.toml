@@ -5,7 +5,6 @@ include = '\.py$'
 exclude = '''
 (
     migrations
-    | .tox
     | venv
 )
 '''
