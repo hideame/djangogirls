@@ -156,18 +156,14 @@ class TestCreateView(TestCase):
         expect_form_errors = {"title": ["この値は 200 文字以下でなければなりません( 201 文字になっています)。"]}
         self.assertDictEqual(create_response.context["form"].errors, expect_form_errors)
         list_response = self.client.get(self.list_url)
+        self.assertEqual(list_response.status_code, 200)
 
         # 201文字のタイトルでデータが登録されていないことを確認
         self.assertFalse(Post.objects.filter(title=char_201).exists())
-        self.assertEqual(list_response.status_code, 200)
         self.assertFalse(
             list_response.context["posts"].filter(title=char_201).exists()
         )
-        # データが登録されていないことを確認
-        self.assertTrue(Post.objects.filter(test="タイトル文字数201NG").exists())
-        # self.assertFalse(Post.objects.filter(title=char_201).exists())
-        list_response = self.client.get(self.list_url)
-        self.assertEqual(list_response.status_code, 200)
+        self.assertFalse(Post.objects.filter(text="タイトル文字数201NG").exists())
         self.assertFalse(
-            list_response.context["posts"].filter(title=char_201).exists()
+            list_response.context["posts"].filter(text="タイトル文字数201NG").exists()
         )
