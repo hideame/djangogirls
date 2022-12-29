@@ -7,8 +7,11 @@ from blog.models import Post
 # NOTE: admin権限は利用想定していないのでテストしない
 # TODO: user権限でログイン可能になったらテストケース追加する
 
+
 class TestListView(TestCase):
-    fixtures = ["users",]
+    fixtures = [
+        "users",
+    ]
     list_url = reverse("post_list")
     new_url = reverse("post_new")
 
@@ -34,7 +37,9 @@ class TestListView(TestCase):
 
 
 class TestCreateView(TestCase):
-    fixtures = ["users",]
+    fixtures = [
+        "users",
+    ]
     list_url = reverse("post_list")
     new_url = reverse("post_new")
     char_200 = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmmmmnnnnnnnnnnooooooooooppppppppppqqqqqqqqqqrrrrrrrrrrsssssssssstttttttttt"
@@ -62,9 +67,7 @@ class TestCreateView(TestCase):
         self.assertTrue(Post.objects.filter(title="タイトル１").exists())
         list_response = self.client.get(self.list_url)
         self.assertEqual(list_response.status_code, 200)
-        self.assertTrue(
-            list_response.context["posts"].filter(title="タイトル１").exists()
-        )
+        self.assertTrue(list_response.context["posts"].filter(title="タイトル１").exists())
 
     def test_異常系_POST_未ログイン(self):
         self.client.logout()
@@ -95,9 +98,7 @@ class TestCreateView(TestCase):
         self.assertFalse(Post.objects.filter(text="内容のみ_タイトルなし").exists())
         list_response = self.client.get(self.list_url)
         self.assertEqual(list_response.status_code, 200)
-        self.assertFalse(
-            list_response.context["posts"].filter(text="内容のみ_タイトルなし").exists()
-        )
+        self.assertFalse(list_response.context["posts"].filter(text="内容のみ_タイトルなし").exists())
 
     def test_異常系_POST_コンテンツなし(self):
         self.staff_login()
@@ -116,9 +117,7 @@ class TestCreateView(TestCase):
         self.assertFalse(Post.objects.filter(title="タイトルのみ").exists())
         list_response = self.client.get(self.list_url)
         self.assertEqual(list_response.status_code, 200)
-        self.assertFalse(
-            list_response.context["posts"].filter(title="タイトルのみ").exists()
-        )
+        self.assertFalse(list_response.context["posts"].filter(title="タイトルのみ").exists())
 
     # def test_正常系_POST_タイトル文字数200文字(self):
     #     self.staff_login()
@@ -137,9 +136,7 @@ class TestCreateView(TestCase):
     #     self.assertFalse(Post.objects.filter(title=self.char_200).exists())
     #     list_response = self.client.get(self.list_url)
     #     self.assertEqual(list_response.status_code, 200)
-    #     self.assertFalse(
-    #         list_response.context["posts"].filter(title=self.char_200).exists()
-    #     )
+    #     self.assertFalse(list_response.context["posts"].filter(title=self.char_200).exists())
 
     def test_異常系_POST_タイトル文字数201文字(self):
         char_201 = self.char_200 + "z"
@@ -160,10 +157,6 @@ class TestCreateView(TestCase):
 
         # 201文字のタイトルでデータが登録されていないことを確認
         self.assertFalse(Post.objects.filter(title=char_201).exists())
-        self.assertFalse(
-            list_response.context["posts"].filter(title=char_201).exists()
-        )
+        self.assertFalse(list_response.context["posts"].filter(title=char_201).exists())
         self.assertFalse(Post.objects.filter(text="タイトル文字数201NG").exists())
-        self.assertFalse(
-            list_response.context["posts"].filter(text="タイトル文字数201NG").exists()
-        )
+        self.assertFalse(list_response.context["posts"].filter(text="タイトル文字数201NG").exists())

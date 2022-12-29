@@ -4,7 +4,10 @@ from django.urls import reverse
 
 
 class LoginTest(TestCase):
-    fixtures = ["users",]                   # テスト用DBにユーザを作成
+    # テスト用DBにユーザを作成
+    fixtures = [
+        "users",
+    ]
     list_url = reverse("post_list")
 
     def admin_login(self):
