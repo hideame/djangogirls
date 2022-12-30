@@ -23,16 +23,28 @@ class TestListView(TestCase):
         """初期状態では何も登録されていないことを確認"""
         self.assertEqual(Post.objects.all().count(), 0)
 
-    def test_正常系_post_list_url_staff権限(self):
+    def test_正常系_list_staff権限(self):
         """トップページへ遷移できることをテスト"""
         self.staff_login()
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, 200)
 
-    def test_正常系_post_list_url_未ログイン(self):
+    def test_正常系_list_未ログイン(self):
         """トップページへ遷移できることをテスト"""
         self.client.logout()
         response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_正常系_new_staff権限(self):
+        """記事作成ページへ遷移できることをテスト"""
+        self.staff_login()
+        response = self.client.get(self.new_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_正常系_new_未ログイン(self):
+        """記事作成ページへ遷移できることをテスト"""
+        self.client.logout()
+        response = self.client.get(self.new_url)
         self.assertEqual(response.status_code, 200)
 
 
@@ -48,10 +60,6 @@ class TestCreateView(TestCase):
         self.client.logout()
         self.client.force_login(User.objects.get(username="staff01"))
 
-    def user_login(self):
-        self.client.logout()
-        self.client.force_login(User.objects.get(username="user01"))
-
     def test_正常系_POST_staff権限(self):
         self.staff_login()
         params = {
@@ -63,10 +71,11 @@ class TestCreateView(TestCase):
         # データの登録
         create_response = self.client.post(self.new_url, params)
         self.assertEqual(create_response.status_code, 302)
-        # データが登録されていることを確認
-        self.assertTrue(Post.objects.filter(title="タイトル１").exists())
+        # 一覧ページを表示
         list_response = self.client.get(self.list_url)
         self.assertEqual(list_response.status_code, 200)
+        # データが登録されていることを確認
+        self.assertTrue(Post.objects.filter(title="タイトル１").exists())
         self.assertTrue(list_response.context["posts"].filter(title="タイトル１").exists())
 
     def test_異常系_POST_未ログイン(self):
@@ -94,10 +103,11 @@ class TestCreateView(TestCase):
         self.assertNotEqual(create_response.status_code, 302)
         expect_form_errors = {"title": ["このフィールドは必須です。"]}
         self.assertDictEqual(create_response.context["form"].errors, expect_form_errors)
-        # データが登録されていないことを確認
-        self.assertFalse(Post.objects.filter(text="内容のみ_タイトルなし").exists())
+        # 一覧ページを表示
         list_response = self.client.get(self.list_url)
         self.assertEqual(list_response.status_code, 200)
+        # データが登録されていないことを確認
+        self.assertFalse(Post.objects.filter(text="内容のみ_タイトルなし").exists())
         self.assertFalse(list_response.context["posts"].filter(text="内容のみ_タイトルなし").exists())
 
     def test_異常系_POST_コンテンツなし(self):
@@ -113,30 +123,31 @@ class TestCreateView(TestCase):
         self.assertNotEqual(create_response.status_code, 302)
         expect_form_errors = {"text": ["このフィールドは必須です。"]}
         self.assertDictEqual(create_response.context["form"].errors, expect_form_errors)
-        # データが登録されていないことを確認
-        self.assertFalse(Post.objects.filter(title="タイトルのみ").exists())
+        # 一覧ページを表示
         list_response = self.client.get(self.list_url)
         self.assertEqual(list_response.status_code, 200)
+        # データが登録されていないことを確認
+        self.assertFalse(Post.objects.filter(title="タイトルのみ").exists())
         self.assertFalse(list_response.context["posts"].filter(title="タイトルのみ").exists())
 
-    # def test_正常系_POST_タイトル文字数200文字(self):
-    #     self.staff_login()
-    #     params = {
-    #         "title": self.char_200,
-    #         "text": "タイトル文字数200OK",
-    #     }
-    #     # データが登録されていないことを確認
-    #     self.assertFalse(Post.objects.filter(title=self.char_200).exists())
-    #     # データの登録
-    #     create_response = self.client.post(self.new_url, params)
-    #     self.assertNotEqual(create_response.status_code, 302)
-    #     expect_form_errors = {"text": ["このフィールドは必須です。"]}
-    #     self.assertDictEqual(create_response.context["form"].errors, expect_form_errors)
-    #     # データが登録されていないことを確認
-    #     self.assertFalse(Post.objects.filter(title=self.char_200).exists())
-    #     list_response = self.client.get(self.list_url)
-    #     self.assertEqual(list_response.status_code, 200)
-    #     self.assertFalse(list_response.context["posts"].filter(title=self.char_200).exists())
+    def test_正常系_POST_タイトル文字数200文字(self):
+        self.staff_login()
+        params = {
+            "title": self.char_200,
+            "text": "タイトル文字数200OK",
+        }
+        # データが登録されていないことを確認
+        self.assertFalse(Post.objects.filter(title=self.char_200).exists())
+        # データの登録
+        create_response = self.client.post(self.new_url, params)
+        self.assertEqual(create_response.status_code, 302)
+        # 一覧ページを表示
+        list_response = self.client.get(self.list_url)
+        self.assertEqual(list_response.status_code, 200)
+        # データが登録されていることを確認
+        self.assertTrue(Post.objects.filter(title=self.char_200).exists())
+        self.assertTrue(list_response.context["posts"].filter(title=self.char_200).exists())
+        print(list_response.context["posts"])
 
     def test_異常系_POST_タイトル文字数201文字(self):
         char_201 = self.char_200 + "z"
@@ -152,11 +163,11 @@ class TestCreateView(TestCase):
         self.assertNotEqual(create_response.status_code, 302)
         expect_form_errors = {"title": ["この値は 200 文字以下でなければなりません( 201 文字になっています)。"]}
         self.assertDictEqual(create_response.context["form"].errors, expect_form_errors)
+        # 一覧ページを表示
         list_response = self.client.get(self.list_url)
         self.assertEqual(list_response.status_code, 200)
-
         # 201文字のタイトルでデータが登録されていないことを確認
         self.assertFalse(Post.objects.filter(title=char_201).exists())
-        self.assertFalse(list_response.context["posts"].filter(title=char_201).exists())
         self.assertFalse(Post.objects.filter(text="タイトル文字数201NG").exists())
+        self.assertFalse(list_response.context["posts"].filter(title=char_201).exists())
         self.assertFalse(list_response.context["posts"].filter(text="タイトル文字数201NG").exists())
