@@ -1,4 +1,4 @@
-## Django Girlsを教材に、テストコードを書きました。
+## Django Girlsを教材に、テストコードを書いてみました。
 ```
 % tree blog/tests
 blog/tests
