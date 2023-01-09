@@ -57,7 +57,7 @@ class TestDetailView(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class TestCreateView(TestCase):
+class TestUpdateView(TestCase):
     fixtures = [
         "users",
     ]
